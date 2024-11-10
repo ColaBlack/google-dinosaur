@@ -5,8 +5,16 @@ import GameScene from "./gameScene.js";
 const config = {
   type: Phaser.AUTO, // 游戏渲染器类型
   width: 800,
-  height: 600,
+  height: 300,
+  backgroundColor: "#ffffff", //修改背景色为白色
   scene: [PreLoad, GameScene], // 游戏场景列表
+  physics: {
+    default: "arcade", // 默认物理引擎
+    arcade: {
+      gravity: { y: 5000 }, // 重力设置
+      debug: true, // 调试模式
+    },
+  },
 };
 
 // 创建游戏实例
