@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import Body = Phaser.Physics.Arcade.Body;
 
 export default class GameScene extends Phaser.Scene {
     constructor() {
@@ -13,6 +14,7 @@ export default class GameScene extends Phaser.Scene {
     private scoreSound: Phaser.Sound.BaseSound;
     private scoreText: Phaser.GameObjects.Text;
     private scoreEvent: Phaser.Time.TimerEvent;
+    private timer: number;
 
 
     /**
@@ -71,8 +73,6 @@ export default class GameScene extends Phaser.Scene {
     }
 
     update(time: number) {
-        // 移动地面，模拟奔跑效果
-        this.ground.tilePositionX += 10 * this.speed;
 
         // 播放奔跑动画
         this.dinosaur.anims.play("run", true);
@@ -138,14 +138,15 @@ export default class GameScene extends Phaser.Scene {
             this.dinosaur,
             this.cactusGroup,
             this.handleDinoCactusCollision,
-            null,
+            () => {
+            },
             this
         );
     }
 
     handleJump() {
         // 如果小恐龙不在地面上，则不执行跳跃以避免用户进行二段跳
-        if (!this.dinosaur.body.onFloor()) {
+        if (this.dinosaur?.body instanceof Body && !this.dinosaur?.body.onFloor()) {
             return;
         }
 
@@ -176,7 +177,7 @@ export default class GameScene extends Phaser.Scene {
         cactus.on(
             "OutOfBounds",
             function () {
-                this.destroy();
+                cactus.destroy();
             },
             cactus
         );
@@ -186,7 +187,6 @@ export default class GameScene extends Phaser.Scene {
         this.deadSound.play();
         // 当小恐龙与仙人掌碰撞时，停止游戏
         this.physics.pause();
-        this.isGameRunning = false;
         this.anims.pauseAll();
         this.speed = 1;
         this.score = 0;
@@ -199,7 +199,7 @@ export default class GameScene extends Phaser.Scene {
 
     handleGameOver() {
         // 显示游戏结束文字
-        const gameOverText = this.add
+        this.add
             .image(this.width / 2, this.height / 2 - 100, "gameover_text")
             .setScale(2);
 
@@ -223,7 +223,7 @@ export default class GameScene extends Phaser.Scene {
             `Score: ${this.score} High Score: ${this.highScore}`,
             {
                 fontSize: "32px",
-                fill: "#000",
+                color: "#000000",
             }
         );
 
