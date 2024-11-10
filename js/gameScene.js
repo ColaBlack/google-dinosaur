@@ -52,8 +52,8 @@ export default class GameScene extends Phaser.Scene {
     // 初始化音效
     this.initSounds();
 
-    // 监听用户输入
-    this.handleInput();
+    // 按任意键跳跃
+    this.input.keyboard.on("keydown", this.handleJump.bind(this), this);
 
     this.addScore();
   }
@@ -129,14 +129,6 @@ export default class GameScene extends Phaser.Scene {
       null,
       this
     );
-  }
-
-  /**
-   * 处理用户输入，监听键盘事件
-   */
-  handleInput() {
-    // 监听到按下空格键时，调用handleJump方法
-    this.input.keyboard.on("keydown-SPACE", this.handleJump.bind(this));
   }
 
   handleJump() {
