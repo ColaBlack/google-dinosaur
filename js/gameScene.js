@@ -13,7 +13,20 @@ export default class GameScene extends Phaser.Scene {
    */
   height = 0;
 
+  /**
+   * 游戏速度
+   */
   speed = 1;
+
+  /**
+   * 当前得分
+   */
+  score = 0;
+
+  /**
+   * 历史最高得分
+   */
+  highScore = 0;
 
   create() {
     // 获取游戏画布的宽度和高度
@@ -27,19 +40,19 @@ export default class GameScene extends Phaser.Scene {
       .setScale(2)
       .refreshBody();
 
-    // 添加一个小恐龙
-    this.dinosaur = this.physics.add
-      .sprite(50, this.height / 2, "dinosaur-1")
-      .setOrigin(0, 1);
+    // 创建一个组来存放所有的仙人掌
+    this.cactusGroup = this.physics.add.group();
 
-    // 让小恐龙与地面发生碰撞，防止小恐龙掉落
-    this.physics.add.collider(this.dinosaur, this.ground);
+    // 添加一个小恐龙
+    this.summonDinosaur();
 
     // 调用initAnimate方法初始化动画
     this.initAnimate();
 
     // 监听用户输入
     this.handleInput();
+
+    this.addScore();
   }
 
   update(time, delta) {
@@ -79,6 +92,25 @@ export default class GameScene extends Phaser.Scene {
     });
   }
 
+  summonDinosaur() {
+    // 添加一个小恐龙
+    this.dinosaur = this.physics.add
+      .sprite(50, this.height / 2, "dinosaur-1")
+      .setOrigin(0, 1);
+
+    // 让小恐龙与地面发生碰撞，防止小恐龙掉落
+    this.physics.add.collider(this.dinosaur, this.ground);
+
+    // 添加小恐龙与仙人掌组之间的碰撞检测
+    this.physics.add.collider(
+      this.dinosaur,
+      this.cactusGroup,
+      this.handleDinoCactusCollision,
+      null,
+      this
+    );
+  }
+
   /**
    * 处理用户输入，监听键盘事件
    */
@@ -111,19 +143,81 @@ export default class GameScene extends Phaser.Scene {
     // 让仙人掌与地面发生碰撞，防止仙人掌掉落
     this.physics.add.collider(cactus, this.ground);
 
+    // 将新创建的仙人掌添加到组中
+    this.cactusGroup.add(cactus);
+
     // 设置仙人掌的速度，让它向左移动
     cactus.setVelocityX(-200);
-    
-    // 每生成一个仙人掌，游戏速度加快
-    this.speed += 0.1;
 
     // 当仙人掌离开屏幕时销毁
     cactus.on(
       "OutOfBounds",
       function () {
-        this.destroy(); 
+        this.destroy();
       },
       cactus
     );
+  }
+
+  handleDinoCactusCollision(dinosaur, cactus) {
+    // 当小恐龙与仙人掌碰撞时，停止游戏
+    this.physics.pause();
+    this.isGameRunning = false;
+    this.anims.pauseAll();
+    this.speed = 1;
+    this.score = 0;
+    // 游戏结束时停止得分增加
+    if (this.scoreEvent) {
+      this.scoreEvent.remove(false);
+    }
+    this.handleGameOver();
+  }
+
+  handleGameOver() {
+    // 显示游戏结束文字
+    const gameOverText = this.add
+      .image(this.width / 2, this.height / 2 - 100, "gameover_text")
+      .setScale(2);
+
+    // 显示再玩一次按钮
+    const replayButton = this.add
+      .image(this.width / 2, this.height / 2 + 100, "replay_button")
+      .setInteractive()
+      .setScale(2);
+
+    // 为再玩一次按钮添加点击事件监听器
+    replayButton.on("pointerdown", () => {
+      this.scene.restart(); // 重新开始当前场景
+    });
+  }
+
+  addScore() {
+    // 显示当前得分
+    this.scoreText = this.add.text(
+      this.width / 2 - 100,
+      100,
+      `Score: ${this.score} High Score: ${this.highScore}`,
+      {
+        fontSize: "32px",
+        fill: "#000",
+      }
+    );
+
+    // 每隔100毫秒增加得分
+    this.scoreEvent = this.time.addEvent({
+      delay: 100,
+      callback: () => {
+        this.score += 1;
+        if (this.score > this.highScore) {
+          this.highScore = this.score;
+        }
+        this.scoreText.setText(
+          `Score: ${this.score} High Score: ${this.highScore}`
+        );
+        this.speed += 0.01; // 加快游戏速度
+      },
+      callbackScope: this,
+      loop: true,
+    });
   }
 }
