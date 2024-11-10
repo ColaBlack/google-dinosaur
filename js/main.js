@@ -7,6 +7,7 @@ const config = {
   width: 800,
   height: 300,
   backgroundColor: "#ffffff", //修改背景色为白色
+  parent: "game", 
   scene: [PreLoad, GameScene], // 游戏场景列表
   physics: {
     default: "arcade", // 默认物理引擎
