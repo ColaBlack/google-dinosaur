@@ -46,8 +46,11 @@ export default class GameScene extends Phaser.Scene {
     // 添加一个小恐龙
     this.summonDinosaur();
 
-    // 调用initAnimate方法初始化动画
+    // 初始化动画
     this.initAnimate();
+
+    // 初始化音效
+    this.initSounds();
 
     // 监听用户输入
     this.handleInput();
@@ -61,6 +64,17 @@ export default class GameScene extends Phaser.Scene {
 
     // 播放奔跑动画
     this.dinosaur.anims.play("run", true);
+
+    // 检测小恐龙是否跳过仙人掌
+    this.cactusGroup.getChildren().forEach((cactus) => {
+      // 如果仙人掌的x坐标小于50且未被计分
+      if (cactus.x < 50 && !cactus.getData("scored")) {
+        // 标记仙人掌为已计分，避免重复计分
+        cactus.setData("scored", true);
+        // 播放得分音效
+        this.scoreSound.play();
+      }
+    });
 
     // 定义计时器，每隔1-5秒生成一个仙人掌
     this.timer = this.timer || time;
@@ -90,6 +104,12 @@ export default class GameScene extends Phaser.Scene {
       frameRate: 10,
       repeat: -1,
     });
+  }
+
+  initSounds() {
+    this.deadSound = this.sound.add("dead");
+    this.jumpSound = this.sound.add("jump");
+    this.scoreSound = this.sound.add("score");
   }
 
   summonDinosaur() {
@@ -127,6 +147,7 @@ export default class GameScene extends Phaser.Scene {
 
     // 跳跃
     this.dinosaur.setVelocityY(-1500);
+    this.jumpSound.play();
   }
 
   summonCactus() {
@@ -160,6 +181,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   handleDinoCactusCollision(dinosaur, cactus) {
+    this.deadSound.play();
     // 当小恐龙与仙人掌碰撞时，停止游戏
     this.physics.pause();
     this.isGameRunning = false;
