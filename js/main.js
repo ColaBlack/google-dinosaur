@@ -12,7 +12,7 @@ const config = {
     default: "arcade", // 默认物理引擎
     arcade: {
       gravity: { y: 5000 }, // 重力设置
-      debug: true, // 调试模式
+      debug: false, // 调试模式
     },
   },
 };
