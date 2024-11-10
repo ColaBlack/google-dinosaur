@@ -5,35 +5,45 @@ export default class GameScene extends Phaser.Scene {
         super("gameScene");
     }
 
+    private ground: Phaser.Physics.Arcade.StaticGroup;
+    private cactusGroup: Phaser.Physics.Arcade.Group;
+    private dinosaur: Phaser.Physics.Arcade.Sprite;
+    private deadSound: Phaser.Sound.BaseSound;
+    private jumpSound: Phaser.Sound.BaseSound;
+    private scoreSound: Phaser.Sound.BaseSound;
+    private scoreText: Phaser.GameObjects.Text;
+    private scoreEvent: Phaser.Time.TimerEvent;
+
+
     /**
      * 画布宽度
      */
-    width = 0;
+    private width = 0;
 
     /**
      * 画布高度
      */
-    height = 0;
+    private height = 0;
 
     /**
      * 游戏速度
      */
-    speed = 1;
+    private speed = 1;
 
     /**
      * 当前得分
      */
-    score = 0;
+    private score = 0;
 
     /**
      * 历史最高得分
      */
-    highScore = 0;
+    private highScore = 0;
 
     create() {
         // 获取游戏画布的宽度和高度
-        this.width = this.sys.game.config.width;
-        this.height = this.sys.game.config.height;
+        this.width = Number(this.sys.game.config.width);
+        this.height = Number(this.sys.game.config.height);
 
         // 添加地面，确保地面在屏幕底部
         this.ground = this.physics.add.staticGroup();
@@ -55,12 +65,12 @@ export default class GameScene extends Phaser.Scene {
         this.initSounds();
 
         // 按任意键跳跃
-        this.input.keyboard.on("keydown", this.handleJump.bind(this), this);
+        this.input?.keyboard?.on("keydown", this.handleJump.bind(this), this);
 
         this.addScore();
     }
 
-    update(time, delta) {
+    update(time: number) {
         // 移动地面，模拟奔跑效果
         this.ground.tilePositionX += 10 * this.speed;
 

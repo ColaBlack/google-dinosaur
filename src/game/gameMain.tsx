@@ -3,7 +3,6 @@ import Phaser from 'phaser';
 import PreLoad from './preLoad';
 import GameScene from './gameScene';
 
-
 // 游戏配置
 const config = {
     type: Phaser.AUTO, // 游戏渲染器类型
